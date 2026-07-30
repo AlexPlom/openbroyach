@@ -31,6 +31,8 @@ impl AntigravityUsageClient {
     pub const RETRIEVE_QUOTA_PATH: &'static str = "/v1internal:retrieveUserQuota";
     pub const QUOTA_SUMMARY_PATH: &'static str = "/v1internal:retrieveUserQuotaSummary";
     pub const GOOGLE_OAUTH_URL: &'static str = "https://oauth2.googleapis.com/token";
+    // These installed-app OAuth credentials ship in Antigravity itself and are therefore public.
+    // They are required to refresh Antigravity's keychain token while the app is closed.
     pub const GOOGLE_CLIENT_ID: &'static str =
         "1071006060591-tmhssin2h21lcre235vtolojh4g403ep.apps.googleusercontent.com";
     pub const GOOGLE_CLIENT_SECRET: &'static str = "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";
