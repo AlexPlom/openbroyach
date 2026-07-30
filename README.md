@@ -77,6 +77,7 @@ There is no configuration ceremony. Provider order is the only persisted prefere
 | --- | --- | --- |
 | **Antigravity** | Gemini and Claude quota pools, session and weekly windows | System credential store used by Antigravity |
 | **Codex** | Session and weekly limits, credits, resets, and local spend | Codex `auth.json` and local session logs |
+| **Claude Code** | Five-hour and weekly subscription limits plus extra usage | Claude Code OAuth credentials |
 | **OpenCode** | Go session, weekly, and monthly caps plus local usage | OpenCode `auth.json` and local message data |
 
 Only providers with usable local credentials appear. OpenBroyach reads those credentials for the corresponding provider requests; it never asks you to paste them into the app.

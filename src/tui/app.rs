@@ -2,6 +2,7 @@ use crate::http::HttpClient;
 use crate::models::{ProviderLink, ProviderSnapshot};
 use crate::pricing::ModelPricing;
 use crate::providers::antigravity::AntigravityProvider;
+use crate::providers::claude::provider::ClaudeProvider;
 use crate::providers::codex::provider::CodexProvider;
 use crate::providers::opencode::provider::OpenCodeProvider;
 use crate::tui::logos::provider_logo;
@@ -52,6 +53,25 @@ impl App {
     }
 
     pub fn initialise(&mut self, logo_picker: Option<&Picker>) {
+        let claude = ClaudeProvider::new(HttpClient::new());
+        if claude.has_local_credentials() {
+            self.providers.push(ProviderEntry {
+                id: "claude".to_string(),
+                display_name: "Claude Code".to_string(),
+                account_label: None,
+                links: claude
+                    .provider
+                    .visible_links()
+                    .into_iter()
+                    .cloned()
+                    .collect(),
+                logo: None,
+                snapshot: None,
+                error: None,
+                expanded: true,
+            });
+        }
+
         let opencode = OpenCodeProvider::new();
         if opencode.has_local_credentials() {
             let links = opencode
@@ -136,6 +156,7 @@ impl App {
         self.now = chrono::Utc::now();
 
         let refresh_codex = self.providers.iter().any(|entry| entry.id == "codex");
+        let refresh_claude = self.providers.iter().any(|entry| entry.id == "claude");
         let refresh_antigravity = self.providers.iter().any(|entry| entry.id == "antigravity");
         let refresh_opencode = self.providers.iter().any(|entry| entry.id == "opencode");
 
@@ -149,6 +170,13 @@ impl App {
                     .await),
                 Err(error) => Err(format!("Pricing load failed: {error}")),
             })
+        };
+        let claude_refresh = async move {
+            if refresh_claude {
+                Some(Ok(ClaudeProvider::new(HttpClient::new()).refresh().await))
+            } else {
+                None
+            }
         };
         let opencode_refresh = async move {
             if refresh_opencode {
@@ -166,11 +194,19 @@ impl App {
                 None
             }
         };
-        let (codex_result, antigravity_result, opencode_result) =
-            join_refreshes(codex_refresh, antigravity_refresh, opencode_refresh).await;
+        let (codex_result, claude_result, antigravity_result, opencode_result) = join_refreshes(
+            codex_refresh,
+            claude_refresh,
+            antigravity_refresh,
+            opencode_refresh,
+        )
+        .await;
 
         if let Some(result) = codex_result {
             self.apply_refresh_result("codex", result);
+        }
+        if let Some(result) = claude_result {
+            self.apply_refresh_result("claude", result);
         }
         if let Some(result) = antigravity_result {
             self.apply_refresh_result("antigravity", result);
@@ -312,17 +348,19 @@ struct ProviderOrder {
     provider_order: Vec<String>,
 }
 
-async fn join_refreshes<C, A, O>(
+async fn join_refreshes<C, L, A, O>(
     codex: C,
+    claude: L,
     antigravity: A,
     opencode: O,
-) -> (C::Output, A::Output, O::Output)
+) -> (C::Output, L::Output, A::Output, O::Output)
 where
     C: std::future::Future,
+    L: std::future::Future,
     A: std::future::Future,
     O: std::future::Future,
 {
-    tokio::join!(codex, antigravity, opencode)
+    tokio::join!(codex, claude, antigravity, opencode)
 }
 
 #[cfg(test)]
@@ -389,14 +427,16 @@ mod tests {
 
     #[tokio::test]
     async fn provider_refresh_futures_are_polled_concurrently() {
-        let barrier = Arc::new(tokio::sync::Barrier::new(3));
+        let barrier = Arc::new(tokio::sync::Barrier::new(4));
         let first_barrier = barrier.clone();
         let second_barrier = barrier.clone();
         let third_barrier = barrier.clone();
+        let fourth_barrier = barrier.clone();
         let joined = join_refreshes(
             async move { first_barrier.wait().await },
             async move { second_barrier.wait().await },
             async move { third_barrier.wait().await },
+            async move { fourth_barrier.wait().await },
         );
 
         assert!(

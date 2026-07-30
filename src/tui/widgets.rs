@@ -612,6 +612,7 @@ fn provider_icon(provider_id: &str) -> (&'static str, Color) {
     match provider_id {
         "antigravity" => ("A", Color::Blue),
         "codex" => ("✦", Color::Magenta),
+        "claude" => ("C", Color::Rgb(217, 119, 87)),
         "opencode" => ("▣", Color::Cyan),
         _ => ("◇", Color::Gray),
     }
@@ -743,6 +744,7 @@ mod tests {
     #[test]
     fn provider_icons_are_distinct_and_have_a_fallback() {
         assert_eq!(provider_icon("codex").0, "✦");
+        assert_eq!(provider_icon("claude").0, "C");
         assert_eq!(provider_icon("opencode").0, "▣");
         assert_eq!(provider_icon("antigravity").0, "A");
         assert_eq!(provider_icon("future-provider").0, "◇");
