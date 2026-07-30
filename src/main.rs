@@ -18,6 +18,11 @@ const EVENT_POLL_INTERVAL: Duration = Duration::from_secs(1);
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    if std::env::args_os().any(|argument| argument == "--version" || argument == "-V") {
+        println!("openbroyach {}", env!("CARGO_PKG_VERSION"));
+        return Ok(());
+    }
+
     tracing_subscriber::fmt::init();
 
     let mut terminal = ratatui::init();

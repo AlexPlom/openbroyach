@@ -39,6 +39,18 @@ It borrows the core idea from [OpenUsage](https://github.com/robinebers/openusag
 cargo install --git https://github.com/tokmac/openbroyach
 ```
 
+### Omarchy / Arch Linux
+
+Download `openbroyach-linux-x86_64.tar.gz` from the latest GitHub release, then install it for your user:
+
+```bash
+tar -xzf openbroyach-linux-x86_64.tar.gz
+install -Dm755 openbroyach "$HOME/.local/bin/openbroyach"
+openbroyach --version
+```
+
+Omarchy already includes `xdg-open`, which OpenBroyach uses for dashboard links. Antigravity additionally needs an unlocked Secret Service provider. If credential lookup fails, install and start GNOME Keyring with `omarchy pkg add gnome-keyring libsecret`, then sign out and back in so the graphical session initializes it. Codex and OpenCode do not require GNOME Keyring.
+
 ### From Source
 
 ```bash
@@ -137,6 +149,8 @@ It is a quick, honest view of the limits and activity your tools expose.
 - A local sign-in for at least one supported provider
 - Rust 1.88 or later when building from source
 - On Linux, a running Secret Service provider for Antigravity credential access
+
+Prebuilt Linux releases target 64-bit glibc systems, including current Arch Linux and Omarchy installations.
 
 ## Development
 

@@ -33,21 +33,23 @@ impl ModelPricing {
         // Check supplement alias -> alias_of
         if let Some(canonical) = self.supplement.canonical_name(model) {
             let is_fast = model.ends_with("-fast");
-            if let Some(r) = self.resolve(&canonical) {
-                let mut rates = r;
-                if is_fast {
-                    if let Some(rule) = self
-                        .supplement
-                        .alias_rules
-                        .iter()
-                        .find(|e| e.pattern == model)
-                    {
-                        if let Some(fast) = rule.fast {
-                            rates.fast_multiplier = fast;
+            if canonical != model {
+                if let Some(r) = self.resolve(&canonical) {
+                    let mut rates = r;
+                    if is_fast {
+                        if let Some(rule) = self
+                            .supplement
+                            .alias_rules
+                            .iter()
+                            .find(|e| e.pattern == model)
+                        {
+                            if let Some(fast) = rule.fast {
+                                rates.fast_multiplier = fast;
+                            }
                         }
                     }
+                    return Some(rates);
                 }
-                return Some(rates);
             }
         }
 
@@ -97,5 +99,11 @@ mod tests {
         std::fs::remove_dir_all(unrelated).unwrap();
         let pricing = result.unwrap();
         assert!(pricing.resolve("gpt-5.4").is_some());
+    }
+
+    #[test]
+    fn self_referential_alias_does_not_recurse() {
+        let pricing = ModelPricing::load().unwrap();
+        let _ = pricing.resolve("auto");
     }
 }
