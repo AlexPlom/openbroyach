@@ -1,0 +1,50 @@
+[package]
+name = "openbroyach"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# HTTP client
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+tokio = { version = "1", features = ["full"] }
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# Date/time
+chrono = { version = "0.4", features = ["serde"] }
+# TUI
+ratatui = "0.29"
+crossterm = "0.28"
+ratatui-image = { version = "8.1.1", default-features = false, features = ["crossterm"] }
+image = { version = "0.25.9", default-features = false }
+resvg = "0.47"
+# Error handling
+thiserror = "2"
+anyhow = "1"
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+# UUID
+uuid = { version = "1", features = ["v4"] }
+# SQLite (for OpenCode/Cursor auth)
+rusqlite = { version = "0.32", features = ["bundled"] }
+# TOML (Devin auth)
+toml = "0.8"
+# File watching (for JSONL scanners)
+notify = "7"
+# Async helpers
+futures = "0.3"
+# Home directory resolution
+dirs = "5"
+# Regex (lite)
+regex-lite = "0.1"
+# Base64 (JWT decode)
+base64 = "0.22"
+# Credential-bound Antigravity access-token cache
+sha2 = "0.10"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_Security_Credentials", "Win32_Storage_FileSystem"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+keyring = { version = "4.1.5", default-features = false, features = ["v1"] }
